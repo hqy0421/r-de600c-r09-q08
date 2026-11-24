@@ -1,0 +1,5 @@
+edge_uuid,edge_type,edge_name,valid_time,from_path,from_value,to_path,to_value,diff,abs_diff
+01a20c5e-6f18-79cf-b5d9-79b5515af32c,Line,bench-conn-1,2026-11-20T10:00:00.000000+0000,TestBench/Meter-A,101.5,TestBench/Meter-B,101.2,0.29999999999999716,0.29999999999999716
+01a20c5e-6f18-79cf-b5d9-79b5515af32c,Line,bench-conn-1,2026-11-20T11:00:00.000000+0000,TestBench/Meter-A,99.8,TestBench/Meter-B,99.8,0.0,0.0
+01a20c5e-6f18-79cf-b5d9-79b5515af32c,Line,bench-conn-1,2026-11-20T12:00:00.000000+0000,TestBench/Meter-A,103.2,TestBench/Meter-B,104.0,-0.7999999999999972,0.7999999999999972
+01a20c5e-6f18-79cf-b5d9-79b5515af32c,Line,bench-conn-1,2026-11-20T13:00:00.000000+0000,TestBench/Meter-A,100.7,TestBench/Meter-B,100.9,-0.20000000000000284,0.20000000000000284

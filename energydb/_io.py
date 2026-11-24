@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import inspect
 import logging
 import os
 import re
@@ -460,6 +461,22 @@ def _is_unknown_table(exc: BaseException | None) -> bool:
     return False
 
 
+def _filter_supported_kwargs(fn: Callable, kwargs: dict) -> dict:
+    """Drop keyword args the installed timedb does not accept.
+
+    energydb may run against a timedb build whose ``read`` predates a given
+    option (``bucket_us`` / ``bucket_dedup`` were added after 0.12.0). Passing
+    an unknown kwarg raises ``TypeError`` and breaks every read, even though
+    the option is optional. Filtering against the live signature keeps newer
+    builds byte-identical (every kwarg they declare is forwarded) while older
+    builds simply skip what they cannot express.
+    """
+    params = inspect.signature(fn).parameters
+    if any(p.kind == inspect.Parameter.VAR_KEYWORD for p in params.values()):
+        return dict(kwargs)
+    return {k: v for k, v in kwargs.items() if k in params}
+
+
 def _td_call(
     td,
     *,
@@ -475,15 +492,11 @@ def _td_call(
     path) makes the CH query self-resolve its ``series_id`` set via the
     PostgreSQL engine table instead of the id array.
     """
-    if relative:
+    td_fn = td.read_relative if relative else td.read
+    safe_kwargs = _filter_supported_kwargs(td_fn, kwargs)
 
-        def _call(series_ids: list[int], retentions: list[str] | None) -> pl.DataFrame:
-            return td.read_relative(series_ids=series_ids, retention=retentions, meta_source=meta_source, **kwargs)
-
-    else:
-
-        def _call(series_ids: list[int], retentions: list[str] | None) -> pl.DataFrame:
-            return td.read(series_ids=series_ids, retention=retentions, meta_source=meta_source, **kwargs)
+    def _call(series_ids: list[int], retentions: list[str] | None) -> pl.DataFrame:
+        return td_fn(series_ids=series_ids, retention=retentions, meta_source=meta_source, **safe_kwargs)
 
     return _call
 
